@@ -1,4 +1,10 @@
-import { AUDIT_ACTION_LABELS, ROLE_LABELS, type Role } from "@repo/shared";
+import {
+  AUDIT_ACTION_LABELS,
+  FIELD_LABELS,
+  ROLE_LABELS,
+  formatAuditValue,
+  type Role,
+} from "@repo/shared";
 import { formatDateTime } from "@repo/shared/utils";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -78,14 +84,24 @@ function ActivityTab() {
                         key={change.field}
                         className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-xs"
                       >
-                        <span className="font-mono">{change.field}</span>
-                        <span className="text-foreground/70">
-                          {change.oldValue ?? "—"}
+                        <span>
+                          {FIELD_LABELS[change.field] ?? change.field}
                         </span>
-                        <ArrowRight className="size-3" />
-                        <span className="text-foreground font-medium">
-                          {change.newValue ?? "—"}
-                        </span>
+                        {change.oldValue === null ? (
+                          <span className="text-foreground font-medium">
+                            {formatAuditValue(change.field, change.newValue)}
+                          </span>
+                        ) : (
+                          <>
+                            <span className="text-foreground/70">
+                              {formatAuditValue(change.field, change.oldValue)}
+                            </span>
+                            <ArrowRight className="size-3" />
+                            <span className="text-foreground font-medium">
+                              {formatAuditValue(change.field, change.newValue)}
+                            </span>
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>

@@ -40,3 +40,28 @@ export const AUDIT_ACTION_LABELS = {
   RiskInputsUpdated: "Risk inputs updated",
   Closed: "Closed",
 } as const;
+
+export const FIELD_LABELS: Record<string, string> = {
+  likelihood: "Likelihood",
+  impact: "Impact",
+  riskLevel: "Risk level",
+  status: "Status",
+  triageDecision: "Triage decision",
+  investigationRequired: "Investigation required",
+  correctiveActionRequired: "Is corrective action required?",
+  correctiveActionStatus: "Corrective action status",
+  reviewNote: "Review note",
+  investigationOutcome: "Investigation outcome",
+  closedAt: "Closed at",
+};
+
+const BOOLEAN_FIELDS = new Set([
+  "investigationRequired",
+  "correctiveActionRequired",
+]);
+
+export function formatAuditValue(field: string, value: string | null): string {
+  if (value === null) return "—";
+  if (BOOLEAN_FIELDS.has(field)) return value === "true" ? "Yes" : "No";
+  return value;
+}
