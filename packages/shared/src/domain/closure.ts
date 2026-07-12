@@ -26,6 +26,12 @@ function isBlank(value: string | null | undefined): boolean {
  * so the check and its enforcement cannot diverge.
  */
 export function getClosureStatus(input: ClosureInput): ClosureStatus {
+  // An already-closed case has nothing outstanding and is not "ready to close".
+  // Reporting R1's blocker here would claim a finished case was never triaged.
+  if (input.status === "Closed") {
+    return { ready: false, blockers: [] };
+  }
+
   const blockers: string[] = [];
 
   // R1 — must be triaged first.

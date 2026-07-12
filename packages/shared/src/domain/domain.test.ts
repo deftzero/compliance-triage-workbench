@@ -82,6 +82,15 @@ describe("getClosureStatus", () => {
     expect(getClosureStatus(baseCase())).toEqual({ ready: true, blockers: [] });
   });
 
+  it("reports no blockers for an already-closed case", () => {
+    // It is not "ready to close" — it is closed. Claiming it was never triaged
+    // would be a false statement about a finished case.
+    const status = getClosureStatus(
+      baseCase({ status: "Closed", closedAt: "2026-05-02T10:00:00.000Z" }),
+    );
+    expect(status).toEqual({ ready: false, blockers: [] });
+  });
+
   it("blocks an untriaged case (R1)", () => {
     const status = getClosureStatus(baseCase({ status: "Reported" }));
     expect(status.ready).toBe(false);

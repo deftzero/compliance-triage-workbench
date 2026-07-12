@@ -1,17 +1,13 @@
 import type { Health } from "@repo/shared";
-import cors from "cors";
 import express, { type Express } from "express";
-import { createV1Router } from "./api/v1/routes/index.js";
-import { env } from "./config/env.js";
+import { GRAPHQL_PATH, createYogaServer } from "./api/v1/graphql/yoga.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 
 export async function createApp(): Promise<Express> {
   const app = express();
+  const yoga = await createYogaServer();
 
-  app.use(cors({ origin: env.CORS_ORIGIN }));
-  app.use(express.json());
-
-  // Unversioned on purpose: liveness probes shouldn't care about API versions.
+  // Unversioned on purpose: liveness probes shouldn't track API versions.
   app.get("/health", (_req, res) => {
     const body: Health = {
       status: "ok",
@@ -21,8 +17,15 @@ export async function createApp(): Promise<Express> {
     res.json(body);
   });
 
-  app.use("/api/v1", await createV1Router());
+  // `app.all`, not `app.use`: mounting strips the prefix from req.url, which
+  // would leave Yoga unable to match its own graphqlEndpoint. GET is included
+  // so GraphiQL is served from the same path in dev.
+  //
+  // This also runs ahead of express.json() deliberately — Yoga reads the raw
+  // body itself, and a body parser here would consume the stream first.
+  app.all(GRAPHQL_PATH, (req, res) => yoga(req, res));
 
+  app.use(express.json());
   app.use(notFoundHandler);
   app.use(errorHandler);
 

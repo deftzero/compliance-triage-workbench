@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type {
+  Actor,
   AuthResponse,
   CreateUserInput,
   JwtPayload,
@@ -41,7 +42,7 @@ export class AuthService {
     const user = await this.users.findByEmail(input.email);
 
     // Same error for "no such user" and "wrong password" so the endpoint
-    // can't be used to enumerate registered emails.
+    // can't be used to enumerate registered accounts.
     if (!user) throw new UnauthorizedError("Invalid email or password");
 
     const valid = await bcrypt.compare(input.password, user.passwordHash);
@@ -50,11 +51,30 @@ export class AuthService {
     return this.authResponse(user);
   }
 
-  /** Re-reads the user so a token for a since-deleted account is rejected. */
-  async getCurrentUser(payload: JwtPayload): Promise<PublicUser> {
-    const user = await this.users.findById(payload.sub);
+  async getCurrentUser(userId: string): Promise<PublicUser> {
+    const user = await this.users.findById(userId);
     if (!user) throw new UnauthorizedError("User no longer exists");
     return toPublicUser(user);
+  }
+
+  /**
+   * Resolves a bearer token to the principal every domain rule is evaluated
+   * against. The user is re-read rather than trusted from the token, so a
+   * token for a deleted user — or one whose role changed — can't be replayed.
+   * Returns null for a bad token; requiring an actor is the resolver's job.
+   */
+  async actorFromToken(token: string): Promise<Actor | null> {
+    let payload: JwtPayload;
+    try {
+      payload = this.verifyToken(token);
+    } catch {
+      return null;
+    }
+
+    const user = await this.users.findById(payload.sub);
+    if (!user) return null;
+
+    return { id: user.id, name: user.name, role: user.role };
   }
 
   verifyToken(token: string): JwtPayload {
