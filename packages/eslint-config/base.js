@@ -19,6 +19,18 @@ export const config = [
     },
     rules: {
       "turbo/no-undeclared-env-vars": "warn",
+      // A leading underscore is how we mark a binding that exists only to
+      // satisfy a signature (Express's 4-arity error handler, omit-by-destructure).
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          args: "all",
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
     },
   },
   {

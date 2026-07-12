@@ -1,0 +1,9 @@
+{
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src", "tsup.config.ts", "drizzle.config.ts", "eslint.config.js"],
+  "exclude": ["node_modules", "dist"]
+}
