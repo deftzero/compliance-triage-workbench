@@ -60,13 +60,13 @@ function RootLayout() {
 
   return (
     <div className="bg-background text-foreground flex min-h-screen">
-      <aside className="hidden w-64 shrink-0 flex-col border-r p-4 md:flex">
-        <div className="flex items-center gap-2 px-2 py-3">
+      <aside className="hidden w-52 shrink-0 flex-col border-r p-3 md:flex">
+        <div className="flex items-center gap-2 px-2 py-2">
           <ShieldCheck className="size-5" />
           <span className="font-heading font-semibold">Compliance</span>
         </div>
 
-        <nav className="mt-4 flex flex-col gap-1">
+        <nav className="mt-3 flex flex-col gap-1">
           {nav.map((item) => (
             <SidebarLink key={item.to} item={item} pathname={pathname} />
           ))}
@@ -81,7 +81,7 @@ function RootLayout() {
           </Button>
         )}
 
-        <div className="mt-auto border-t pt-4">
+        <div className="mt-auto border-t pt-3">
           <div className="px-2 text-sm font-medium">{user.name}</div>
           <div className="text-muted-foreground px-2 text-xs">
             {ROLE_LABELS[user.role]}
@@ -90,7 +90,7 @@ function RootLayout() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 px-6 py-8 md:px-10">
+      <main className="min-w-0 flex-1 px-4 py-4 md:px-6">
         <Outlet />
       </main>
 

@@ -34,10 +34,10 @@ function DashboardPage() {
   const isReporter = user.role === "Reporter";
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">
+          <h1 className="font-heading text-xl font-semibold tracking-tight">
             Dashboard
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -85,8 +85,8 @@ function DashboardContent({
   ).length;
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         <StatCard label="Awaiting triage" value={awaitingTriage} icon={Inbox} />
         <StatCard
           label="Open, high or critical"
@@ -100,7 +100,7 @@ function DashboardContent({
         />
       </div>
 
-      <Card>
+      <Card size="sm">
         <CardHeader>
           <CardTitle>{isReporter ? "My cases" : "Recent cases"}</CardTitle>
           <CardDescription>Newest first.</CardDescription>
@@ -155,13 +155,15 @@ function StatCard({
   icon: LucideIcon;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardDescription>{label}</CardDescription>
-        <Icon className="text-muted-foreground size-4" />
-      </CardHeader>
-      <CardContent>
-        <div className="font-heading text-3xl font-semibold">{value}</div>
+    <Card size="sm">
+      <CardContent className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-muted-foreground text-xs">{label}</div>
+          <div className="font-heading text-2xl leading-tight font-semibold">
+            {value}
+          </div>
+        </div>
+        <Icon className="text-muted-foreground size-4 shrink-0" />
       </CardContent>
     </Card>
   );
@@ -169,20 +171,18 @@ function StatCard({
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         {Array.from({ length: 3 }, (_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-4 w-28" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-12" />
+          <Card key={i} size="sm">
+            <CardContent className="space-y-2">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-7 w-10" />
             </CardContent>
           </Card>
         ))}
       </div>
-      <Card>
+      <Card size="sm">
         <CardHeader>
           <Skeleton className="h-5 w-32" />
         </CardHeader>

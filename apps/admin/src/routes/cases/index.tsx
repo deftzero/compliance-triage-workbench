@@ -64,10 +64,10 @@ function CasesPage() {
   if (!user) return null;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">
+          <h1 className="font-heading text-xl font-semibold tracking-tight">
             {user.role === "Reporter" ? "My Cases" : "Cases"}
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -178,8 +178,8 @@ function FilterSelect({
 
 function CaseTable({ cases }: { cases: CaseView[] }) {
   return (
-    <Card>
-      <CardContent className="pt-6">
+    <Card size="sm">
+      <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
@@ -228,14 +228,17 @@ function CaseTable({ cases }: { cases: CaseView[] }) {
 
 function CaseGrid({ cases }: { cases: CaseView[] }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {cases.map((complianceCase) => (
         <Link
           key={complianceCase.id}
           to="/cases/$caseId"
           params={{ caseId: complianceCase.id }}
         >
-          <Card className="hover:border-foreground/20 h-full transition-colors">
+          <Card
+            size="sm"
+            className="hover:ring-foreground/20 h-full transition-shadow"
+          >
             <CardHeader>
               <div className="flex items-start justify-between gap-2">
                 <CardTitle className="text-base leading-snug">

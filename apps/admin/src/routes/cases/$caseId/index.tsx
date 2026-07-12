@@ -68,7 +68,7 @@ function ProgressTab() {
   const canAct = can.editWorkflow(user.role) && data.status !== "Closed";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {!canAct && <ReadOnlyNotice complianceCase={data} role={user.role} />}
 
       {canAct && data.status === "Reported" && (
@@ -80,7 +80,8 @@ function ProgressTab() {
 
       {!canAct && <WorkflowSummary complianceCase={data} />}
 
-      <ClosurePanel complianceCase={data} canClose={canAct} />
+      {/* Read-only viewers see closure readiness in the details rail instead. */}
+      {canAct && <ClosurePanel complianceCase={data} />}
     </div>
   );
 }
@@ -133,7 +134,7 @@ function TriageForm({ complianceCase }: { complianceCase: CaseView }) {
   });
 
   return (
-    <Card>
+    <Card size="sm">
       <CardHeader>
         <CardTitle>Triage</CardTitle>
         <CardDescription>
@@ -143,7 +144,7 @@ function TriageForm({ complianceCase }: { complianceCase: CaseView }) {
       </CardHeader>
       <CardContent>
         <form
-          className="space-y-5"
+          className="space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
             mutation.mutate();
@@ -233,7 +234,7 @@ function WorkflowForm({ complianceCase }: { complianceCase: CaseView }) {
   const actionClosed = complianceCase.correctiveActionStatus === "Closed";
 
   return (
-    <Card>
+    <Card size="sm">
       <CardHeader>
         <CardTitle>Review</CardTitle>
         <CardDescription>
@@ -241,7 +242,7 @@ function WorkflowForm({ complianceCase }: { complianceCase: CaseView }) {
           value.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="reviewNote">Review note</Label>
           <Textarea
@@ -262,7 +263,7 @@ function WorkflowForm({ complianceCase }: { complianceCase: CaseView }) {
         </div>
 
         {complianceCase.investigationRequired && (
-          <div className="space-y-2 border-t pt-5">
+          <div className="space-y-2 border-t pt-4">
             <Label htmlFor="investigationOutcome">Investigation outcome</Label>
             <Textarea
               id="investigationOutcome"
@@ -287,7 +288,7 @@ function WorkflowForm({ complianceCase }: { complianceCase: CaseView }) {
         )}
 
         {complianceCase.correctiveActionRequired && (
-          <div className="flex items-center justify-between border-t pt-5">
+          <div className="flex items-center justify-between border-t pt-4">
             <div>
               <div className="text-sm font-medium">Corrective action</div>
               <div className="text-muted-foreground text-xs">
@@ -320,32 +321,37 @@ function WorkflowForm({ complianceCase }: { complianceCase: CaseView }) {
   );
 }
 
-/** What a read-only viewer sees in place of the editable workflow fields. */
+/**
+ * What a read-only viewer sees in place of the editable workflow fields.
+ * Case facts (decision, dates, risk inputs) live in the details rail; this
+ * card only carries the workflow text the rail doesn't show.
+ */
 function WorkflowSummary({ complianceCase }: { complianceCase: CaseView }) {
   const rows: [string, string][] = [
-    ["Triage decision", complianceCase.triageDecision ?? "Not triaged"],
     [
-      "Investigation required",
-      complianceCase.investigationRequired ? "Yes" : "No",
+      "Investigation",
+      complianceCase.investigationRequired
+        ? (complianceCase.investigationOutcome ?? "Required — no outcome yet")
+        : "Not required",
     ],
-    ["Investigation outcome", complianceCase.investigationOutcome ?? "—"],
     [
-      "Corrective action required",
-      complianceCase.correctiveActionRequired ? "Yes" : "No",
+      "Corrective action",
+      complianceCase.correctiveActionRequired
+        ? (complianceCase.correctiveActionStatus ?? "Open")
+        : "Not required",
     ],
-    ["Corrective action status", complianceCase.correctiveActionStatus ?? "—"],
     ["Review note", complianceCase.reviewNote ?? "—"],
   ];
 
   return (
-    <Card>
+    <Card size="sm">
       <CardHeader>
         <CardTitle>Progress</CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="divide-y text-sm">
           {rows.map(([label, value]) => (
-            <div key={label} className="grid gap-1 py-3 sm:grid-cols-3">
+            <div key={label} className="grid gap-1 py-2 sm:grid-cols-3">
               <dt className="text-muted-foreground">{label}</dt>
               <dd className="sm:col-span-2">{value}</dd>
             </div>
@@ -356,13 +362,7 @@ function WorkflowSummary({ complianceCase }: { complianceCase: CaseView }) {
   );
 }
 
-function ClosurePanel({
-  complianceCase,
-  canClose,
-}: {
-  complianceCase: CaseView;
-  canClose: boolean;
-}) {
+function ClosurePanel({ complianceCase }: { complianceCase: CaseView }) {
   const queryClient = useQueryClient();
   const { closureStatus, status } = complianceCase;
 
@@ -382,26 +382,36 @@ function ClosurePanel({
     serverBlockers.length > 0 ? serverBlockers : closureStatus.blockers;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Closure</CardTitle>
-        <CardDescription>
-          A case can only be closed once every requirement is satisfied.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {closureStatus.ready ? (
-          <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 className="size-4" />
-            Ready to close — nothing outstanding.
-          </div>
-        ) : (
+    <Card size="sm">
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          {closureStatus.ready ? (
+            <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-4" />
+              Ready to close — nothing outstanding.
+            </div>
+          ) : (
+            <div className="text-muted-foreground text-sm">
+              {blockers.length} requirement{blockers.length === 1 ? "" : "s"}{" "}
+              outstanding before this case can close.
+            </div>
+          )}
+
+          <Button
+            disabled={!closureStatus.ready || mutation.isPending}
+            title={
+              closureStatus.ready ? undefined : `Blocked: ${blockers.join(" ")}`
+            }
+            onClick={() => mutation.mutate()}
+          >
+            {mutation.isPending ? "Closing…" : "Close case"}
+          </Button>
+        </div>
+
+        {!closureStatus.ready && (
           <Alert variant="destructive">
             <ShieldAlert />
-            <AlertTitle>
-              {blockers.length} item{blockers.length === 1 ? "" : "s"} still
-              outstanding
-            </AlertTitle>
+            <AlertTitle>Blocking closure</AlertTitle>
             <AlertDescription>
               <ul className="list-inside list-disc space-y-1">
                 {blockers.map((blocker) => (
@@ -417,20 +427,6 @@ function ClosurePanel({
             title="Close failed"
             message={toApiError(mutation.error).message}
           />
-        )}
-
-        {canClose && (
-          <Button
-            disabled={!closureStatus.ready || mutation.isPending}
-            title={
-              closureStatus.ready
-                ? undefined
-                : `Blocked: ${blockers.join(" ")}`
-            }
-            onClick={() => mutation.mutate()}
-          >
-            {mutation.isPending ? "Closing…" : "Close case"}
-          </Button>
         )}
       </CardContent>
     </Card>

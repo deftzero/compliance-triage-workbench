@@ -31,7 +31,7 @@ function ActivityTab() {
   });
 
   return (
-    <Card>
+    <Card size="sm">
       <CardHeader>
         <CardTitle>Activity Logs</CardTitle>
         <CardDescription>
@@ -49,7 +49,7 @@ function ActivityTab() {
         ) : data.length === 0 ? (
           <EmptyState message="No activity recorded yet." />
         ) : (
-          <ol className="space-y-6">
+          <ol className="space-y-4">
             {data.map((entry) => (
               <li
                 key={entry.id}

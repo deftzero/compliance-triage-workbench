@@ -5,12 +5,13 @@ import {
   createFileRoute,
   useRouterState,
 } from "@tanstack/react-router";
-import { ArrowLeft, Lock } from "lucide-react";
-import { ClosureBadge, RiskBadge, StatusBadge } from "@/components/case-badges";
+import { ArrowLeft, CheckCircle2, CircleDashed, Lock } from "lucide-react";
+import { RiskBadge, StatusBadge } from "@/components/case-badges";
 import { ErrorState, LoadingRows } from "@/components/query-states";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchCase } from "@/lib/api";
+import { fetchCase, type CaseView } from "@/lib/api";
 import { toApiError } from "@/lib/graphql";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,7 @@ function CaseDetailLayout() {
 
   if (isPending) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="space-y-4">
         <Skeleton className="h-8 w-72" />
         <LoadingRows rows={3} />
       </div>
@@ -38,91 +39,64 @@ function CaseDetailLayout() {
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-4xl">
-        <ErrorState
-          title="Could not load this case"
-          message={toApiError(error).message}
-          onRetry={() => void refetch()}
-        />
-      </div>
+      <ErrorState
+        title="Could not load this case"
+        message={toApiError(error).message}
+        onRetry={() => void refetch()}
+      />
     );
   }
 
-  const isClosed = data.status === "Closed";
   const onActivity = pathname.endsWith("/activity");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="-ml-2"
-        render={<Link to="/cases" />}
-      >
-        <ArrowLeft />
-        Back to cases
-      </Button>
-
-      {/* Summary header — persists across both sub-pages. */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">
-            {data.title}
-          </h1>
-          <div className="flex shrink-0 items-center gap-2">
-            <RiskBadge risk={data.riskLevel} />
-            <StatusBadge status={data.status} />
-          </div>
-        </div>
-
-        <p className="text-muted-foreground text-sm">{data.description}</p>
-
-        <div className="text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
-          <span>
-            Likelihood <strong>{data.likelihood}</strong> · Impact{" "}
-            <strong>{data.impact}</strong>
-          </span>
-          {data.category && <span>Category: {data.category}</span>}
-          <span>Reported {new Date(data.createdAt).toLocaleString()}</span>
-          {data.triagedAt && (
-            <span>Triaged {new Date(data.triagedAt).toLocaleString()}</span>
-          )}
-          {data.closedAt && (
-            <span>Closed {new Date(data.closedAt).toLocaleString()}</span>
-          )}
-          <ClosureBadge
-            status={data.status}
-            closureStatus={data.closureStatus}
-          />
-        </div>
-
-        {isClosed && (
-          <div className="text-muted-foreground flex items-center gap-2 rounded-md border border-dashed px-3 py-2 text-xs">
-            <Lock className="size-3.5" />
-            This case is closed and immutable. No further changes are accepted.
-          </div>
-        )}
+    <div className="space-y-4">
+      {/* Compact header: everything identifying the case on one line. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Back to cases"
+          render={<Link to="/cases" />}
+        >
+          <ArrowLeft />
+        </Button>
+        <h1 className="font-heading min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">
+          {data.title}
+        </h1>
+        <RiskBadge risk={data.riskLevel} />
+        <StatusBadge status={data.status} />
       </div>
 
-      <nav className="flex gap-1 border-b">
-        <SubNavLink to="/cases/$caseId" caseId={caseId} active={!onActivity}>
-          Progress
-        </SubNavLink>
-        <SubNavLink
-          to="/cases/$caseId/activity"
-          caseId={caseId}
-          active={onActivity}
-        >
-          Activity Logs
-        </SubNavLink>
-      </nav>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        {/* Work surface: tabbed sub-pages. */}
+        <div className="min-w-0 flex-1 space-y-3">
+          <nav className="bg-muted text-muted-foreground inline-flex h-8 items-center rounded-lg p-[3px]">
+            <TabLink to="/cases/$caseId" caseId={caseId} active={!onActivity}>
+              Progress
+            </TabLink>
+            <TabLink
+              to="/cases/$caseId/activity"
+              caseId={caseId}
+              active={onActivity}
+            >
+              Activity Logs
+            </TabLink>
+          </nav>
 
-      <Outlet />
+          <Outlet />
+        </div>
+
+        {/* Details rail: the facts of the case, always in view. */}
+        <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:w-80">
+          <DetailsPanel complianceCase={data} />
+        </aside>
+      </div>
     </div>
   );
 }
 
-function SubNavLink({
+function TabLink({
   to,
   caseId,
   active,
@@ -138,13 +112,89 @@ function SubNavLink({
       to={to}
       params={{ caseId }}
       className={cn(
-        "-mb-px border-b-2 px-3 py-2 text-sm transition-colors",
+        "inline-flex h-full items-center rounded-md px-3 text-sm font-medium transition-colors",
         active
-          ? "border-foreground font-medium"
-          : "text-muted-foreground hover:text-foreground border-transparent",
+          ? "bg-background text-foreground shadow-sm"
+          : "hover:text-foreground",
       )}
     >
       {children}
     </Link>
+  );
+}
+
+function DetailsPanel({ complianceCase }: { complianceCase: CaseView }) {
+  const { closureStatus, status } = complianceCase;
+
+  return (
+    <Card size="sm">
+      <CardContent className="space-y-4">
+        <p className="text-muted-foreground text-sm">
+          {complianceCase.description}
+        </p>
+
+        <dl className="space-y-2 border-t pt-3 text-sm">
+          <DetailRow label="Likelihood" value={complianceCase.likelihood} />
+          <DetailRow label="Impact" value={complianceCase.impact} />
+          {complianceCase.category && (
+            <DetailRow label="Category" value={complianceCase.category} />
+          )}
+          {complianceCase.triageDecision && (
+            <DetailRow label="Decision" value={complianceCase.triageDecision} />
+          )}
+          <DetailRow
+            label="Reported"
+            value={new Date(complianceCase.createdAt).toLocaleString()}
+          />
+          {complianceCase.triagedAt && (
+            <DetailRow
+              label="Triaged"
+              value={new Date(complianceCase.triagedAt).toLocaleString()}
+            />
+          )}
+          {complianceCase.closedAt && (
+            <DetailRow
+              label="Closed"
+              value={new Date(complianceCase.closedAt).toLocaleString()}
+            />
+          )}
+        </dl>
+
+        <div className="border-t pt-3">
+          {status === "Closed" ? (
+            <div className="text-muted-foreground flex items-start gap-2 text-xs">
+              <Lock className="mt-0.5 size-3.5 shrink-0" />
+              Closed and immutable — no further changes are accepted.
+            </div>
+          ) : closureStatus.ready ? (
+            <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-3.5" />
+              Ready to close
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
+                <CircleDashed className="size-3.5" />
+                Blocking closure
+              </div>
+              <ul className="text-muted-foreground list-inside list-disc space-y-1 text-xs">
+                {closureStatus.blockers.map((blocker) => (
+                  <li key={blocker}>{blocker}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <dt className="text-muted-foreground shrink-0 text-xs">{label}</dt>
+      <dd className="text-right text-sm">{value}</dd>
+    </div>
   );
 }
