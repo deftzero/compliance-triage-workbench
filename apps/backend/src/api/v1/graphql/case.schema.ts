@@ -81,8 +81,12 @@ const CaseType = builder.objectRef<CaseView>("Case").implement({
     }),
     triagedAt: t.exposeString("triagedAt", { nullable: true }),
     triagedBy: t.exposeID("triagedBy", { nullable: true }),
-    investigationRequired: t.exposeBoolean("investigationRequired"),
-    correctiveActionRequired: t.exposeBoolean("correctiveActionRequired"),
+    investigationRequired: t.exposeBoolean("investigationRequired", {
+      nullable: true,
+    }),
+    correctiveActionRequired: t.exposeBoolean("correctiveActionRequired", {
+      nullable: true,
+    }),
 
     reviewNote: t.exposeString("reviewNote", { nullable: true }),
     investigationOutcome: t.exposeString("investigationOutcome", {

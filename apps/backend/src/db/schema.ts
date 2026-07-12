@@ -77,12 +77,8 @@ export const cases = pgTable("cases", {
   triageDecision: triageDecision("triage_decision"),
   triagedAt: timestamp("triaged_at", { withTimezone: true }),
   triagedBy: uuid("triaged_by"),
-  investigationRequired: boolean("investigation_required")
-    .notNull()
-    .default(false),
-  correctiveActionRequired: boolean("corrective_action_required")
-    .notNull()
-    .default(false),
+    investigationRequired: boolean("investigation_required"),
+    correctiveActionRequired: boolean("corrective_action_required"),
 
   reviewNote: text("review_note"),
   investigationOutcome: text("investigation_outcome"),

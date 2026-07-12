@@ -40,8 +40,8 @@ export const caseSchema = z.object({
   triageDecision: triageDecisionSchema.nullable(),
   triagedAt: z.iso.datetime().nullable(),
   triagedBy: z.uuid().nullable(),
-  investigationRequired: z.boolean(),
-  correctiveActionRequired: z.boolean(),
+  investigationRequired: z.boolean().nullable(),
+  correctiveActionRequired: z.boolean().nullable(),
 
   reviewNote: z.string().max(5000).nullable(),
   investigationOutcome: z.string().max(5000).nullable(),
