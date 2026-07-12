@@ -5,7 +5,7 @@ import {
   type RiskLevel,
 } from "@repo/shared";
 import { useQuery } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FilePlus2, LayoutGrid, List, Search } from "lucide-react";
 import { useState } from "react";
 import { ClosureBadge, RiskBadge, StatusBadge } from "@/components/case-badges";
@@ -177,6 +177,8 @@ function FilterSelect({
 }
 
 function CaseTable({ cases }: { cases: CaseView[] }) {
+  const navigate = useNavigate();
+
   return (
     <Card size="sm">
       <CardContent>
@@ -192,15 +194,18 @@ function CaseTable({ cases }: { cases: CaseView[] }) {
           </TableHeader>
           <TableBody>
             {cases.map((complianceCase) => (
-              <TableRow key={complianceCase.id} className="cursor-pointer">
+              <TableRow
+                key={complianceCase.id}
+                className="cursor-pointer"
+                onClick={() =>
+                  navigate({
+                    to: "/cases/$caseId",
+                    params: { caseId: complianceCase.id },
+                  })
+                }
+              >
                 <TableCell className="font-medium">
-                  <Link
-                    to="/cases/$caseId"
-                    params={{ caseId: complianceCase.id }}
-                    className="hover:underline"
-                  >
-                    {complianceCase.title}
-                  </Link>
+                  {complianceCase.title}
                 </TableCell>
                 <TableCell>
                   <RiskBadge risk={complianceCase.riskLevel} />
