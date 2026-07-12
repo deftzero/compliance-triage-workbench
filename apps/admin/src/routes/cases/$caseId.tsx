@@ -88,7 +88,7 @@ function CaseDetailLayout() {
         </div>
 
         {/* Details rail: the facts of the case, always in view. */}
-        <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:w-80">
+        <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:mt-11 lg:w-80">
           <DetailsPanel complianceCase={data} />
         </aside>
       </div>
