@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchCase, type CaseView } from "@/lib/api";
 import { toApiError } from "@/lib/graphql";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@repo/shared/utils";
 
 export const Route = createFileRoute("/cases/$caseId")({
   component: CaseDetailLayout,
@@ -144,18 +145,18 @@ function DetailsPanel({ complianceCase }: { complianceCase: CaseView }) {
           )}
           <DetailRow
             label="Reported"
-            value={new Date(complianceCase.createdAt).toLocaleString()}
+          value={formatDateTime(complianceCase.createdAt)}
+        />
+        {complianceCase.triagedAt && (
+          <DetailRow
+            label="Triaged"
+            value={formatDateTime(complianceCase.triagedAt)}
           />
-          {complianceCase.triagedAt && (
-            <DetailRow
-              label="Triaged"
-              value={new Date(complianceCase.triagedAt).toLocaleString()}
-            />
-          )}
-          {complianceCase.closedAt && (
-            <DetailRow
-              label="Closed"
-              value={new Date(complianceCase.closedAt).toLocaleString()}
+        )}
+        {complianceCase.closedAt && (
+          <DetailRow
+            label="Closed"
+            value={formatDateTime(complianceCase.closedAt)}
             />
           )}
         </dl>
@@ -167,7 +168,7 @@ function DetailsPanel({ complianceCase }: { complianceCase: CaseView }) {
               Closed and immutable — no further changes are accepted.
             </div>
           ) : closureStatus.ready ? (
-            <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-2 text-xs font-medium text-success">
               <CheckCircle2 className="size-3.5" />
               Ready to close
             </div>

@@ -386,7 +386,7 @@ function ClosurePanel({ complianceCase }: { complianceCase: CaseView }) {
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between gap-4">
           {closureStatus.ready ? (
-            <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-2 text-sm text-success">
               <CheckCircle2 className="size-4" />
               Ready to close — nothing outstanding.
             </div>

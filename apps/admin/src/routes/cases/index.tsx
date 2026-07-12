@@ -4,6 +4,7 @@ import {
   type CaseStatus,
   type RiskLevel,
 } from "@repo/shared";
+import { formatDate } from "@repo/shared/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FilePlus2, LayoutGrid, List, Search } from "lucide-react";
@@ -159,10 +160,15 @@ function FilterSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    // Base UI's Select can emit null when cleared; treat that as "no filter".
     <Select value={value} onValueChange={(next) => onChange(next ?? ANY)}>
       <SelectTrigger className="w-40">
-        <SelectValue placeholder={label} />
+        {value === ANY ? (
+          <span className="flex flex-1 text-left text-muted-foreground">
+            {label}
+          </span>
+        ) : (
+          <SelectValue />
+        )}
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={ANY}>All {label.toLowerCase()}</SelectItem>
@@ -220,7 +226,7 @@ function CaseTable({ cases }: { cases: CaseView[] }) {
                   />
                 </TableCell>
                 <TableCell className="text-muted-foreground text-right text-sm">
-                  {new Date(complianceCase.createdAt).toLocaleDateString()}
+                  {formatDate(complianceCase.createdAt)}
                 </TableCell>
               </TableRow>
             ))}

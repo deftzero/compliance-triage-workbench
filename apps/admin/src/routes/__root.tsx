@@ -60,7 +60,7 @@ function RootLayout() {
 
   return (
     <div className="bg-background text-foreground flex min-h-screen">
-      <aside className="hidden w-52 shrink-0 flex-col border-r p-3 md:flex">
+      <aside className="bg-sidebar text-sidebar-foreground hidden w-52 shrink-0 flex-col border-sidebar-border border-r p-3 md:flex">
         <div className="flex items-center gap-2 px-2 py-2">
           <ShieldCheck className="size-5" />
           <span className="font-heading font-semibold">Compliance</span>
@@ -81,9 +81,9 @@ function RootLayout() {
           </Button>
         )}
 
-        <div className="mt-auto border-t pt-3">
+        <div className="mt-auto border-sidebar-border border-t pt-3">
           <div className="px-2 text-sm font-medium">{user.name}</div>
-          <div className="text-muted-foreground px-2 text-xs">
+          <div className="text-sidebar-foreground/70 px-2 text-xs">
             {ROLE_LABELS[user.role]}
           </div>
           <SignOutButton />
@@ -115,8 +115,8 @@ function SidebarLink({
       className={cn(
         "flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors",
         active
-          ? "bg-accent text-accent-foreground font-medium"
-          : "text-muted-foreground hover:bg-accent/50",
+          ? "bg-background text-foreground font-medium"
+          : "text-sidebar-foreground/70 hover:bg-background/10",
       )}
     >
       <item.icon className="size-4" />

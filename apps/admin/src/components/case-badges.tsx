@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const RISK_STYLES: Record<RiskLevel, string> = {
-  Low: "border-transparent bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
-  Medium: "border-transparent bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  Low: "border-transparent bg-success/15 text-success",
+  Medium: "border-transparent bg-[hsl(40,90%,51%)]/15 text-[hsl(40,90%,51%)]",
   High: "border-transparent bg-orange-500/15 text-orange-700 dark:text-orange-400",
-  Critical: "border-transparent bg-red-500/15 text-red-700 dark:text-red-400",
+  Critical: "border-transparent bg-destructive/15 text-destructive",
 };
 
 export function RiskBadge({ risk }: { risk: RiskLevel }) {
@@ -53,7 +53,7 @@ export function ClosureBadge({
 
   if (closureStatus.ready) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+      <span className="inline-flex items-center gap-1 text-xs text-success">
         <CheckCircle2 className="size-3" />
         Ready to close
       </span>

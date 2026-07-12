@@ -1,4 +1,5 @@
 import { AUDIT_ACTION_LABELS, ROLE_LABELS, type Role } from "@repo/shared";
+import { formatDateTime } from "@repo/shared/utils";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
@@ -59,7 +60,7 @@ function ActivityTab() {
 
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   <time className="text-muted-foreground text-xs tabular-nums">
-                    {new Date(entry.timestamp).toLocaleString()}
+                    {formatDateTime(entry.timestamp)}
                   </time>
                   <span className="font-medium">{entry.actorName}</span>
                   <span className="text-muted-foreground text-xs">

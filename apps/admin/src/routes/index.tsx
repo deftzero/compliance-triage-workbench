@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, FilePlus2, Inbox } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ClosureBadge, RiskBadge, StatusBadge } from "@/components/case-badges";
@@ -17,6 +17,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { fetchCases, type CaseView } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { toApiError } from "@/lib/graphql";
@@ -77,6 +85,7 @@ function DashboardContent({
   cases: CaseView[];
   isReporter: boolean;
 }) {
+  const navigate = useNavigate();
   const open = cases.filter((c) => c.status !== "Closed");
   const awaitingTriage = cases.filter((c) => c.status === "Reported").length;
   const readyToClose = open.filter((c) => c.closureStatus.ready).length;
@@ -115,29 +124,46 @@ function DashboardContent({
               }
             />
           ) : (
-            <ul className="divide-y">
-              {cases.slice(0, 6).map((complianceCase) => (
-                <li key={complianceCase.id}>
-                  <Link
-                    to="/cases/$caseId"
-                    params={{ caseId: complianceCase.id }}
-                    className="hover:bg-accent/50 -mx-2 flex items-center justify-between gap-4 rounded-md px-2 py-3 transition-colors"
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Risk</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Closure</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {cases.slice(0, 6).map((complianceCase) => (
+                  <TableRow
+                    key={complianceCase.id}
+                    className="cursor-pointer"
+                    onClick={() =>
+                      navigate({
+                        to: "/cases/$caseId",
+                        params: { caseId: complianceCase.id },
+                      })
+                    }
                   >
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                    <TableCell className="font-medium">
                       {complianceCase.title}
-                    </span>
-                    <span className="flex shrink-0 items-center gap-2">
+                    </TableCell>
+                    <TableCell>
                       <RiskBadge risk={complianceCase.riskLevel} />
+                    </TableCell>
+                    <TableCell>
                       <StatusBadge status={complianceCase.status} />
+                    </TableCell>
+                    <TableCell>
                       <ClosureBadge
                         status={complianceCase.status}
                         closureStatus={complianceCase.closureStatus}
                       />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
