@@ -1,6 +1,8 @@
 import {
   calculateRiskLevel,
+  CATEGORY_OPTIONS,
   likelihoodImpactSchema,
+  type CreateCaseInput,
   type LikelihoodImpact,
 } from "@repo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -33,7 +35,7 @@ function ReportCasePage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string | null>(null);
   const [likelihood, setLikelihood] = useState<LikelihoodImpact>("Medium");
   const [impact, setImpact] = useState<LikelihoodImpact>("Medium");
 
@@ -44,7 +46,7 @@ function ReportCasePage() {
         description,
         likelihood,
         impact,
-        ...(category.trim() ? { category: category.trim() } : {}),
+        ...(category ? { category: category as CreateCaseInput["category"] } : {}),
       }),
     onSuccess: async (created) => {
       await queryClient.invalidateQueries({ queryKey: ["cases"] });
@@ -105,13 +107,22 @@ function ReportCasePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category (optional)</Label>
-              <Input
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="e.g. Procurement"
-              />
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={category ?? ""}
+                onValueChange={(next) => setCategory(next || null)}
+              >
+                <SelectTrigger id="category" className="w-full">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORY_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

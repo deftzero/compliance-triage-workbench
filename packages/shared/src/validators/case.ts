@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CATEGORY_OPTIONS } from "../domain/constants.js";
 
 export const riskLevelSchema = z.enum(["Low", "Medium", "High", "Critical"]);
 export const caseStatusSchema = z.enum(["Reported", "Triaged", "Closed"]);
@@ -9,6 +10,8 @@ export const triageDecisionSchema = z.enum([
 ]);
 export const correctiveActionStatusSchema = z.enum(["Open", "Closed"]);
 export const likelihoodImpactSchema = z.enum(["Low", "Medium", "High"]);
+
+export const categorySchema = z.enum(CATEGORY_OPTIONS);
 
 export const auditActionSchema = z.enum([
   "Reported",
@@ -24,7 +27,7 @@ export const caseSchema = z.object({
   id: z.uuid(),
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(5000),
-  category: z.string().max(120).nullable(),
+  category: categorySchema.nullable(),
 
   // Risk inputs are supplied; riskLevel is always derived from them.
   likelihood: likelihoodImpactSchema,
@@ -55,7 +58,7 @@ export const createCaseSchema = z.object({
   description: z.string().min(1, "Description is required").max(5000),
   likelihood: likelihoodImpactSchema,
   impact: likelihoodImpactSchema,
-  category: z.string().max(120).optional(),
+  category: categorySchema.optional(),
 });
 
 export const triageInputSchema = z.object({

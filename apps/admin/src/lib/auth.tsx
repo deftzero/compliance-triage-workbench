@@ -37,7 +37,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(() => {
     tokenStore.clear();
-    queryClient.clear();
+    queryClient.setQueryData(["me"], null);
+    queryClient.removeQueries({
+      predicate: (q) => q.queryKey[0] !== "me",
+    });
   }, [queryClient]);
 
   return (

@@ -12,6 +12,19 @@ export const CLOSURE_BLOCKERS = {
 export const CASE_CLOSED_MESSAGE =
   "This case is closed and can no longer be modified.";
 
+export const CATEGORY_OPTIONS = [
+  "Safety",
+  "Health and Safety",
+  "Legal / Insurance",
+  "Clinical equipment",
+  "Waste management",
+  "Clinical records",
+  "Medication",
+  "Staff conduct",
+  "Data breach",
+  "Other",
+] as const;
+
 export const ROLE_LABELS = {
   ComplianceManager: "Compliance Manager",
   Auditor: "Auditor",

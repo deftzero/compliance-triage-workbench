@@ -53,7 +53,7 @@ export async function seed(
       "Three expense claims in Q2 were filed without supporting receipts.",
     likelihood: "Low",
     impact: "Low",
-    category: "Finance",
+    category: "Legal / Insurance",
   });
 
   // Reported, critical — awaiting triage.
@@ -63,7 +63,7 @@ export async function seed(
       "A marketing list including customer emails was uploaded to a vendor with no signed DPA.",
     likelihood: "High",
     impact: "High",
-    category: "Data Protection",
+    category: "Data breach",
   });
 
   // Triaged and blocked: high risk, investigation and corrective action open —
@@ -74,7 +74,7 @@ export async function seed(
       "A procurement lead approved a contract for a company owned by a relative.",
     likelihood: "Medium",
     impact: "High",
-    category: "Procurement",
+    category: "Staff conduct",
   });
   await cases.triage(managerActor, conflict.id, {
     decision: "Escalated",
@@ -88,7 +88,7 @@ export async function seed(
     description: "A contractor used a reserved visitor parking bay for a week.",
     likelihood: "Low",
     impact: "Low",
-    category: "Facilities",
+    category: "Safety",
   });
   await cases.triage(managerActor, parking.id, {
     decision: "Accepted",
@@ -102,7 +102,7 @@ export async function seed(
     description: "A team member accepted event tickets valued above the limit.",
     likelihood: "Medium",
     impact: "Medium",
-    category: "Ethics",
+    category: "Staff conduct",
   });
   await cases.triage(managerActor, gifts.id, {
     decision: "Accepted",

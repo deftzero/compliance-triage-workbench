@@ -13,6 +13,7 @@ import type { AuditRepository, CaseRepository } from "./case.repository.js";
 function toCase(row: CaseRow): ComplianceCase {
   return {
     ...row,
+    category: row.category as ComplianceCase["category"],
     triagedAt: row.triagedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     closedAt: row.closedAt?.toISOString() ?? null,
