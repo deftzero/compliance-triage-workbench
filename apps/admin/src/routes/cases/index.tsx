@@ -8,7 +8,7 @@ import { formatDate } from "@repo/shared/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FilePlus2, LayoutGrid, List, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ClosureBadge, RiskBadge, StatusBadge } from "@/components/case-badges";
 import {
   EmptyState,
@@ -48,13 +48,19 @@ function CasesPage() {
   const [status, setStatus] = useState<CaseStatus | typeof ANY>(ANY);
   const [riskLevel, setRiskLevel] = useState<RiskLevel | typeof ANY>(ANY);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   // Filters are sent to the server rather than applied to a cached list, so
   // the Reporter's scoping stays the backend's decision.
   const filter = {
     ...(status !== ANY ? { status } : {}),
     ...(riskLevel !== ANY ? { riskLevel } : {}),
-    ...(search.trim() ? { q: search.trim() } : {}),
+    ...(debouncedSearch.trim() ? { q: debouncedSearch.trim() } : {}),
   };
 
   const { data, isPending, isError, error, refetch } = useQuery({
