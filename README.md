@@ -1,159 +1,147 @@
-# Turborepo starter
+# Compliance Triage Workbench
 
-This Turborepo starter is maintained by the Turborepo core team.
+A Turborepo monorepo: a React (Vite) admin SPA, a Node/Express API, and a
+shared package of types, Zod validators, and utilities used by both.
 
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
+```
+apps/
+  admin/     React + Vite SPA (TanStack Router + Query, shadcn/ui)
+  backend/   Node + Express + TypeScript API
+packages/
+  shared/            @repo/shared — types, utils, Zod validators
+  eslint-config/     shared ESLint flat configs
+  typescript-config/ shared tsconfig presets (base, vite, react-library)
 ```
 
-## What's inside?
+## Requirements
 
-This Turborepo includes the following packages/apps:
+- Node 22 (`.nvmrc` — run `nvm use`)
+- pnpm 10 (`corepack enable` picks up the pinned version)
 
-### Apps and Packages
+## Getting started
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+pnpm install
+cp apps/backend/.env.example apps/backend/.env   # then set JWT_SECRET
+pnpm dev                                          # runs admin + backend together
 ```
 
-Without global `turbo`, use your package manager:
+Generate a secret for `JWT_SECRET`:
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+The backend refuses to boot on invalid config, so a missing or too-short
+`JWT_SECRET` fails immediately with a readable message rather than at first use.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+| App     | URL                     |
+| ------- | ----------------------- |
+| admin   | <http://localhost:5173> |
+| backend | <http://localhost:3001> |
 
-```sh
-turbo build --filter=docs
+Run one app at a time with `pnpm --filter admin dev` / `pnpm --filter backend dev`.
+
+## Repo-wide tasks
+
+```bash
+pnpm typecheck   # alias for `turbo run check-types`
+pnpm build
+pnpm lint
+pnpm format
 ```
 
-Without global `turbo`:
+## Backend
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+All endpoints live under `/api/v1`, mirrored by the directory layout in
+`src/api/v1/` — so adding a `v2` is a copy of the folder, not a rewrite.
+`/health` is deliberately unversioned.
+
+| Method | Endpoint                | Auth   |
+| ------ | ----------------------- | ------ |
+| GET    | `/health`               | —      |
+| POST   | `/api/v1/auth/register` | —      |
+| POST   | `/api/v1/auth/login`    | —      |
+| GET    | `/api/v1/auth/me`       | Bearer |
+| GET    | `/api/v1/users`         | Bearer |
+| GET    | `/api/v1/users/:id`     | Bearer |
+| DELETE | `/api/v1/users/:id`     | Bearer |
+| GET    | `/api/v1/public`        | —      |
+| GET    | `/api/v1/protected`     | Bearer |
+
+Requests are validated with the Zod schemas from `@repo/shared`, and every
+failure comes back in one shape:
+
+```json
+{ "error": { "code": "VALIDATION_ERROR", "message": "...", "issues": [] } }
 ```
 
-### Develop
+Example register → login → protected flow:
 
-To develop all apps and packages, run the following command:
+```bash
+curl -X POST http://localhost:3001/api/v1/auth/register \
+  -H 'content-type: application/json' \
+  -d '{"email":"admin@example.com","name":"Admin","password":"supersecret123","role":"admin"}'
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+TOKEN=$(curl -s -X POST http://localhost:3001/api/v1/auth/login \
+  -H 'content-type: application/json' \
+  -d '{"email":"admin@example.com","password":"supersecret123"}' | jq -r .token)
 
-```sh
-cd my-turborepo
-turbo dev
+curl http://localhost:3001/api/v1/protected -H "authorization: Bearer $TOKEN"
 ```
 
-Without global `turbo`, use your package manager:
+### Switching persistence
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
+`PERSISTENCE` in `apps/backend/.env` selects the repository implementation.
+Both satisfy the same `UserRepository` interface, so nothing above the
+repository layer changes.
+
+```bash
+PERSISTENCE=memory     # default — in-process store, no infra required
+PERSISTENCE=database   # Postgres via Drizzle; DATABASE_URL becomes required
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+The Drizzle client sits behind a dynamic import, so in memory mode `pg` is
+never loaded and no connection pool is opened. In database mode, create the
+table first:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
+```bash
+DATABASE_URL=postgres://user:pass@localhost:5432/db pnpm --filter backend db:push
 ```
 
-Without global `turbo`:
+## Admin
 
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+A client-side-only SPA — plain TanStack Router, no SSR and no TanStack Start.
+
+The dashboard (`src/routes/index.tsx`) exercises the loading, error, and
+success states of TanStack Query against a dummy API that adds a 1.2–3s delay
+and fails ~30% of the time, so all three states are reachable by reloading.
+Query retries are disabled so simulated failures are actually visible. Swap
+`fetchUsers` in `src/lib/dummy-api.ts` for the `api` client in `src/lib/api.ts`
+to hit the real backend; its base URL comes from `VITE_API_URL`.
+
+Routes are file-based. `src/routeTree.gen.ts` is generated — by the Vite plugin
+in dev, and by `tsr generate` at the start of `build` and `check-types` — and is
+not committed.
+
+Add shadcn components from within `apps/admin`:
+
+```bash
+pnpm dlx shadcn@latest add <component>
 ```
 
-### Remote Caching
+## @repo/shared
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+A source-only internal package: it exports `./src/*.ts` directly and consumers
+transpile it (`tsx` on the backend, Vite in admin), so there is no build step to
+keep in sync.
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+Every exported type is inferred from a Zod schema rather than declared alongside
+one, so the schema stays the single source of truth:
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- **validators** — `userSchema`, `publicUserSchema`, `createUserSchema`,
+  `loginSchema`, `authResponseSchema`, `jwtPayloadSchema`, `envSchema`,
+  `apiErrorSchema`, `healthSchema`
+- **types** — `User`, `PublicUser`, `CreateUserInput`, `LoginInput`,
+  `AuthResponse`, `JwtPayload`, `Env`, `ApiError`, `Health`
+- **utils** — `sleep`, `randomDelay`, `Result` (`ok` / `err` / `isOk` / `unwrap`)

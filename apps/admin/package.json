@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsr generate && tsc -b && vite build",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
-    "check-types": "tsc -b --noEmit"
+    "check-types": "tsr generate && tsc -b --noEmit",
+    "generate:routes": "tsr generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -34,6 +35,7 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tanstack/react-query-devtools": "^5.101.2",
+    "@tanstack/router-cli": "^1.167.18",
     "@tanstack/router-plugin": "^1.168.19",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.17",
