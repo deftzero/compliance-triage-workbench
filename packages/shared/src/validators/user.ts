@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-export const userRoleSchema = z.enum(["admin", "user"]);
+export const roleSchema = z.enum([
+  "ComplianceManager",
+  "Auditor",
+  "Reporter",
+]);
 
 const passwordSchema = z
   .string()
@@ -15,7 +19,7 @@ export const userSchema = z.object({
   id: z.uuid(),
   email: z.email(),
   name: z.string().min(1).max(120),
-  role: userRoleSchema,
+  role: roleSchema,
   passwordHash: z.string(),
   createdAt: z.iso.datetime(),
 });
@@ -27,7 +31,7 @@ export const createUserSchema = z.object({
   email: z.email(),
   name: z.string().min(1).max(120),
   password: passwordSchema,
-  role: userRoleSchema.default("user"),
+  role: roleSchema.default("Reporter"),
 });
 
 export const loginSchema = z.object({
@@ -44,5 +48,5 @@ export const authResponseSchema = z.object({
 export const jwtPayloadSchema = z.object({
   sub: z.uuid(),
   email: z.email(),
-  role: userRoleSchema,
+  role: roleSchema,
 });
