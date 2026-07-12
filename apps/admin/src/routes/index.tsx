@@ -1,9 +1,13 @@
-import type { PublicUser } from "@repo/shared";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { AlertCircle, RefreshCw, ShieldAlert, UserCheck, Users } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { AlertTriangle, CheckCircle2, FilePlus2, Inbox } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { ClosureBadge, RiskBadge, StatusBadge } from "@/components/case-badges";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingRows,
+} from "@/components/query-states";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,173 +17,128 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { fetchUsers } from "@/lib/dummy-api";
+import { fetchCases, type CaseView } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { toApiError } from "@/lib/graphql";
 
-export const Route = createFileRoute("/")({
-  component: Dashboard,
-});
+export const Route = createFileRoute("/")({ component: DashboardPage });
 
-function Dashboard() {
-  const {
-    data: users,
-    isPending,
-    isError,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
+function DashboardPage() {
+  const { user } = useAuth();
+  const { data, isPending, isError, error, refetch } = useQuery({
+    queryKey: ["cases", {}],
+    queryFn: () => fetchCases({}),
   });
 
+  if (!user) return null;
+  const isReporter = user.role === "Reporter";
+
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-semibold tracking-tight">
             Dashboard
           </h1>
           <p className="text-muted-foreground text-sm">
-            Simulated fetch with a randomized delay and a 30% failure rate —
-            reload to cycle through loading, error, and success.
+            {isReporter
+              ? "The cases you have reported."
+              : "Every case across the organisation."}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => void refetch()}
-          disabled={isFetching}
-        >
-          <RefreshCw className={isFetching ? "animate-spin" : undefined} />
-          Refresh
-        </Button>
+
+        {isReporter && (
+          <Button render={<Link to="/cases/new" />}>
+            <FilePlus2 />
+            Report a Case
+          </Button>
+        )}
       </div>
 
       {isPending ? (
         <DashboardSkeleton />
       ) : isError ? (
-        <ErrorState message={error.message} onRetry={() => void refetch()} />
+        <ErrorState
+          title="Could not load cases"
+          message={toApiError(error).message}
+          onRetry={() => void refetch()}
+        />
       ) : (
-        <SuccessState users={users} />
+        <DashboardContent cases={data} isReporter={isReporter} />
       )}
     </div>
   );
 }
 
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-4 w-24" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-12" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-32" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function ErrorState({
-  message,
-  onRetry,
+function DashboardContent({
+  cases,
+  isReporter,
 }: {
-  message: string;
-  onRetry: () => void;
+  cases: CaseView[];
+  isReporter: boolean;
 }) {
-  return (
-    <Alert variant="destructive">
-      <AlertCircle />
-      <AlertTitle>Could not load users</AlertTitle>
-      <AlertDescription className="flex flex-col items-start gap-3">
-        <span>{message}</span>
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          <RefreshCw />
-          Try again
-        </Button>
-      </AlertDescription>
-    </Alert>
-  );
-}
-
-function SuccessState({ users }: { users: PublicUser[] }) {
-  const admins = users.filter((user) => user.role === "admin").length;
+  const open = cases.filter((c) => c.status !== "Closed");
+  const awaitingTriage = cases.filter((c) => c.status === "Reported").length;
+  const readyToClose = open.filter((c) => c.closureStatus.ready).length;
+  const highRisk = open.filter(
+    (c) => c.riskLevel === "High" || c.riskLevel === "Critical",
+  ).length;
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total users" value={users.length} icon={Users} />
-        <StatCard label="Admins" value={admins} icon={ShieldAlert} />
+        <StatCard label="Awaiting triage" value={awaitingTriage} icon={Inbox} />
         <StatCard
-          label="Standard users"
-          value={users.length - admins}
-          icon={UserCheck}
+          label="Open, high or critical"
+          value={highRisk}
+          icon={AlertTriangle}
+        />
+        <StatCard
+          label="Ready to close"
+          value={readyToClose}
+          icon={CheckCircle2}
         />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>
-            Typed as <code>PublicUser</code> and parsed with{" "}
-            <code>publicUserSchema</code> from <code>@repo/shared</code>.
-          </CardDescription>
+          <CardTitle>{isReporter ? "My cases" : "Recent cases"}</CardTitle>
+          <CardDescription>Newest first.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="text-right">Joined</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {user.email}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={user.role === "admin" ? "default" : "secondary"}
-                    >
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-right">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
+          {cases.length === 0 ? (
+            <EmptyState
+              message={
+                isReporter
+                  ? "You haven't reported any cases yet."
+                  : "No cases have been reported yet."
+              }
+            />
+          ) : (
+            <ul className="divide-y">
+              {cases.slice(0, 6).map((complianceCase) => (
+                <li key={complianceCase.id}>
+                  <Link
+                    to="/cases/$caseId"
+                    params={{ caseId: complianceCase.id }}
+                    className="hover:bg-accent/50 -mx-2 flex items-center justify-between gap-4 rounded-md px-2 py-3 transition-colors"
+                  >
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                      {complianceCase.title}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <RiskBadge risk={complianceCase.riskLevel} />
+                      <StatusBadge status={complianceCase.status} />
+                      <ClosureBadge
+                        status={complianceCase.status}
+                        closureStatus={complianceCase.closureStatus}
+                      />
+                    </span>
+                  </Link>
+                </li>
               ))}
-            </TableBody>
-          </Table>
+            </ul>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -193,7 +152,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
 }) {
   return (
     <Card>
@@ -205,5 +164,32 @@ function StatCard({
         <div className="font-heading text-3xl font-semibold">{value}</div>
       </CardContent>
     </Card>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-3">
+        {Array.from({ length: 3 }, (_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-4 w-28" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-12" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-32" />
+        </CardHeader>
+        <CardContent>
+          <LoadingRows />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

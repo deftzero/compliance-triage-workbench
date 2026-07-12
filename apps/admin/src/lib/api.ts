@@ -1,38 +1,172 @@
-import type { ApiError } from "@repo/shared";
-import ky, { HTTPError } from "ky";
+import type {
+  AuditEntry,
+  CaseFilter,
+  ClosureStatus,
+  ComplianceCase,
+  CreateCaseInput,
+  PublicUser,
+  TriageInput,
+  UpdateCaseInput,
+} from "@repo/shared";
+import { request } from "./graphql";
 
-const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+/** Exactly what the backend's Case type resolves to. */
+export type CaseView = ComplianceCase & { closureStatus: ClosureStatus };
 
-/**
- * Single ky instance for the backend. The trailing slash on `baseUrl` matters:
- * it's resolved per the URL spec, so callers pass relative paths like
- * api.get("v1/users").
- */
-export const api = ky.create({
-  baseUrl: `${apiUrl}/api/`,
-  retry: 0,
-  hooks: {
-    beforeRequest: [
-      ({ request }) => {
-        const token = localStorage.getItem("token");
-        if (token) request.headers.set("Authorization", `Bearer ${token}`);
-      },
-    ],
-  },
-});
+const CASE_FIELDS = `
+  id
+  title
+  description
+  category
+  likelihood
+  impact
+  riskLevel
+  status
+  reporterId
+  triageDecision
+  triagedAt
+  investigationRequired
+  correctiveActionRequired
+  reviewNote
+  investigationOutcome
+  correctiveActionStatus
+  createdAt
+  closedAt
+  closureStatus { ready blockers }
+`;
 
-/**
- * The backend returns every failure as `ApiError`, so surface its message
- * rather than ky's generic "Request failed with status code 400".
- */
-export async function toReadableError(error: unknown): Promise<Error> {
-  if (error instanceof HTTPError) {
-    try {
-      const body = (await error.response.json()) as ApiError;
-      return new Error(body.error.message);
-    } catch {
-      return new Error(`Request failed (${error.response.status})`);
-    }
-  }
-  return error instanceof Error ? error : new Error(String(error));
+export async function login(email: string, password: string) {
+  const data = await request<{
+    login: { token: string; user: PublicUser };
+  }>(
+    `mutation Login($email: String!, $password: String!) {
+      login(email: $email, password: $password) {
+        token
+        user { id email name role createdAt }
+      }
+    }`,
+    { email, password },
+  );
+  return data.login;
+}
+
+export async function fetchMe(): Promise<PublicUser> {
+  const data = await request<{ me: PublicUser }>(
+    `query Me { me { id email name role createdAt } }`,
+  );
+  return data.me;
+}
+
+export async function fetchCases(filter: CaseFilter): Promise<CaseView[]> {
+  const data = await request<{ cases: CaseView[] }>(
+    `query Cases($status: CaseStatus, $riskLevel: RiskLevel, $q: String) {
+      cases(status: $status, riskLevel: $riskLevel, q: $q) { ${CASE_FIELDS} }
+    }`,
+    {
+      status: filter.status ?? null,
+      riskLevel: filter.riskLevel ?? null,
+      q: filter.q?.trim() ? filter.q.trim() : null,
+    },
+  );
+  return data.cases;
+}
+
+export async function fetchCase(id: string): Promise<CaseView> {
+  const data = await request<{ case: CaseView }>(
+    `query Case($id: ID!) { case(id: $id) { ${CASE_FIELDS} } }`,
+    { id },
+  );
+  return data.case;
+}
+
+export async function fetchAuditTrail(id: string): Promise<AuditEntry[]> {
+  const data = await request<{ case: { auditTrail: AuditEntry[] } }>(
+    `query AuditTrail($id: ID!) {
+      case(id: $id) {
+        auditTrail {
+          id action actorName actorRole timestamp
+          changes { field oldValue newValue }
+        }
+      }
+    }`,
+    { id },
+  );
+  return data.case.auditTrail;
+}
+
+export async function reportCase(input: CreateCaseInput): Promise<CaseView> {
+  const data = await request<{ reportCase: CaseView }>(
+    `mutation ReportCase(
+      $title: String!, $description: String!,
+      $likelihood: LikelihoodImpact!, $impact: LikelihoodImpact!, $category: String
+    ) {
+      reportCase(
+        title: $title, description: $description,
+        likelihood: $likelihood, impact: $impact, category: $category
+      ) { ${CASE_FIELDS} }
+    }`,
+    { ...input, category: input.category ?? null },
+  );
+  return data.reportCase;
+}
+
+export async function triageCase(
+  id: string,
+  input: TriageInput,
+): Promise<CaseView> {
+  const data = await request<{ triageCase: CaseView }>(
+    `mutation TriageCase(
+      $id: ID!, $decision: TriageDecision!,
+      $investigationRequired: Boolean!, $correctiveActionRequired: Boolean!,
+      $likelihood: LikelihoodImpact, $impact: LikelihoodImpact
+    ) {
+      triageCase(
+        id: $id, decision: $decision,
+        investigationRequired: $investigationRequired,
+        correctiveActionRequired: $correctiveActionRequired,
+        likelihood: $likelihood, impact: $impact
+      ) { ${CASE_FIELDS} }
+    }`,
+    {
+      id,
+      ...input,
+      likelihood: input.likelihood ?? null,
+      impact: input.impact ?? null,
+    },
+  );
+  return data.triageCase;
+}
+
+export async function updateCase(
+  id: string,
+  input: UpdateCaseInput,
+): Promise<CaseView> {
+  const data = await request<{ updateCase: CaseView }>(
+    `mutation UpdateCase(
+      $id: ID!, $reviewNote: String, $investigationOutcome: String,
+      $correctiveActionStatus: CorrectiveActionStatus
+    ) {
+      updateCase(
+        id: $id, reviewNote: $reviewNote,
+        investigationOutcome: $investigationOutcome,
+        correctiveActionStatus: $correctiveActionStatus
+      ) { ${CASE_FIELDS} }
+    }`,
+    {
+      id,
+      reviewNote: input.reviewNote ?? null,
+      investigationOutcome: input.investigationOutcome ?? null,
+      correctiveActionStatus: input.correctiveActionStatus ?? null,
+    },
+  );
+  return data.updateCase;
+}
+
+/** Rejects with an ApiError whose `blockers` lists everything outstanding. */
+export async function closeCase(id: string): Promise<CaseView> {
+  const data = await request<{ closeCase: CaseView }>(
+    `mutation CloseCase($id: ID!) { closeCase(id: $id) { ${CASE_FIELDS} } }`,
+    { id },
+  );
+  return data.closeCase;
 }
