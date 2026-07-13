@@ -72,7 +72,7 @@ function CaseDetailLayout() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         {/* Work surface: tabbed sub-pages. */}
         <div className="min-w-0 flex-1 space-y-3">
-          <nav className="bg-muted text-muted-foreground inline-flex h-8 items-center rounded-lg p-[3px]">
+          <nav className="bg-muted text-muted-foreground inline-flex h-8 items-center rounded-lg p-0.75">
             <TabLink to="/cases/$caseId" caseId={caseId} active={!onActivity}>
               Progress
             </TabLink>
