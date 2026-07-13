@@ -8,6 +8,9 @@
     "build": "tsr generate && tsc -b && vite build",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
     "check-types": "tsr generate && tsc -b --noEmit",
     "generate:routes": "tsr generate"
   },
@@ -33,6 +36,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tanstack/react-query-devtools": "^5.101.2",

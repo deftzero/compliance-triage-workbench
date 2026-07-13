@@ -1,11 +1,11 @@
 import { CLOSURE_BLOCKERS, type Actor } from "@repo/shared";
 import { beforeEach, describe, expect, it } from "vitest";
-import { ClosureBlockedError, ForbiddenError } from "../../../lib/errors.js";
+import { ClosureBlockedError, ForbiddenError } from "../lib/errors.js";
 import {
   InMemoryAuditRepository,
   InMemoryCaseRepository,
-} from "../repositories/in-memory-case.repository.js";
-import { CaseService } from "./case.service.js";
+} from "../api/v1/repositories/in-memory-case.repository.js";
+import { CaseService } from "../api/v1/services/case.service.js";
 
 const manager: Actor = {
   id: "11111111-1111-4111-8111-111111111111",

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ComplianceCase, LikelihoodImpact } from "../types/case.js";
-import { getClosureStatus } from "./closure.js";
-import { CLOSURE_BLOCKERS } from "./constants.js";
-import { diffFields } from "./diff.js";
-import { calculateRiskLevel } from "./risk.js";
+import { getClosureStatus } from "../domain/closure.js";
+import { CLOSURE_BLOCKERS } from "../domain/constants.js";
+import { diffFields } from "../domain/diff.js";
+import { calculateRiskLevel } from "../domain/risk.js";
 
 describe("calculateRiskLevel", () => {
   const cases: [LikelihoodImpact, LikelihoodImpact, string][] = [
@@ -132,6 +132,15 @@ describe("getClosureStatus", () => {
     );
   });
 
+  it("treats a whitespace-only investigation outcome as missing (R3)", () => {
+    const status = getClosureStatus(
+      baseCase({ investigationRequired: true, investigationOutcome: "  \n " }),
+    );
+    expect(status.blockers).toContain(
+      CLOSURE_BLOCKERS.investigationOutcomeMissing,
+    );
+  });
+
   it("blocks when a required corrective action is still open (R4)", () => {
     const status = getClosureStatus(
       baseCase({
@@ -150,6 +159,16 @@ describe("getClosureStatus", () => {
       }),
     );
     expect(status.blockers).toContain(CLOSURE_BLOCKERS.correctiveActionOpen);
+  });
+
+  it("accepts a required corrective action once it is itself closed (R4)", () => {
+    const status = getClosureStatus(
+      baseCase({
+        correctiveActionRequired: true,
+        correctiveActionStatus: "Closed",
+      }),
+    );
+    expect(status).toEqual({ ready: true, blockers: [] });
   });
 
   // The §5 contract: the caller should see everything outstanding at once,

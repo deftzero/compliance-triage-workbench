@@ -24,6 +24,10 @@
       "dependsOn": ["^test"],
       "outputs": []
     },
+    "test:e2e": {
+      "cache": false,
+      "env": ["PORT", "JWT_SECRET", "CORS_ORIGIN", "VITE_API_URL", "CI"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
