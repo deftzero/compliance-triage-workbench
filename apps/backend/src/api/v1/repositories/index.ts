@@ -1,4 +1,3 @@
-import { env } from "../../../config/env.js";
 import {
   InMemoryAuditRepository,
   InMemoryCaseRepository,
@@ -16,28 +15,7 @@ export type Repositories = {
   audit: AuditRepository;
 };
 
-/**
- * Picks the persistence backend from env. The Drizzle path is imported
- * dynamically so that in memory mode we never load `pg` or open a pool —
- * the app boots with no database present at all.
- */
-export async function createRepositories(): Promise<Repositories> {
-  if (env.PERSISTENCE === "database") {
-    const [{ getDb }, { DrizzleUserRepository }, drizzleCases] =
-      await Promise.all([
-        import("../../../db/client.js"),
-        import("./drizzle-user.repository.js"),
-        import("./drizzle-case.repository.js"),
-      ]);
-
-    const db = getDb();
-    return {
-      users: new DrizzleUserRepository(db),
-      cases: new drizzleCases.DrizzleCaseRepository(db),
-      audit: new drizzleCases.DrizzleAuditRepository(db),
-    };
-  }
-
+export function createRepositories(): Repositories {
   return {
     users: new InMemoryUserRepository(),
     cases: new InMemoryCaseRepository(),

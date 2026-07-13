@@ -1,5 +1,4 @@
 import type { Actor } from "@repo/shared";
-import { env } from "../../../config/env.js";
 import type { Repositories } from "../repositories/index.js";
 import type { AuthService } from "./auth.service.js";
 import { CaseService } from "./case.service.js";
@@ -115,6 +114,6 @@ export async function seed(
   await cases.close(managerActor, gifts.id);
 
   console.log(
-    `seeded ${SEED_USERS.length} users (password: ${SEED_PASSWORD}) and 5 cases [persistence=${env.PERSISTENCE}]`,
+    `seeded ${SEED_USERS.length} users (password: ${SEED_PASSWORD}) and 5 cases`,
   );
 }

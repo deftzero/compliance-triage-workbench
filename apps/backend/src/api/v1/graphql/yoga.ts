@@ -12,7 +12,7 @@ import { schema } from "./schema.js";
 export const GRAPHQL_PATH = "/api/v1/graphql";
 
 export async function createYogaServer() {
-  const repositories = await createRepositories();
+  const repositories = createRepositories();
 
   const authService = new AuthService(repositories.users);
   const caseService = new CaseService(repositories.cases, repositories.audit);
