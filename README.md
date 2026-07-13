@@ -23,15 +23,16 @@ packages/
 
 ```bash
 pnpm install
-cp apps/backend/.env.example apps/backend/.env   # then set JWT_SECRET
-pnpm dev                                         # admin + backend together
+pnpm run setup   # writes both .env files, generates a JWT_SECRET
+pnpm dev         # admin + backend together
 ```
 
-Generate a `JWT_SECRET` (16+ chars, or the backend refuses to boot):
+`pnpm run setup` copies each `.env.example` to `.env` and fills `JWT_SECRET`
+with `openssl rand -hex 32` — the backend refuses to boot without a real one
+(16+ chars). It never overwrites an existing `.env`, so it's safe to re-run.
 
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+> Use `pnpm run setup`, not `pnpm setup` — the latter is pnpm's own built-in
+> command and would shadow this script.
 
 | Surface            | URL                                    |
 | ------------------ | -------------------------------------- |
@@ -87,34 +88,4 @@ pnpm test:e2e:ui       # Playwright UI mode
 pnpm typecheck   # turbo run check-types
 pnpm lint
 pnpm build
-```
-
-## How the rules are enforced
-
-Risk calculation, closure readiness, immutability, and role checks are pure
-functions in `@repo/shared` and `apps/backend/src/api/v1/services/case-domain.ts`
-— no Express, GraphQL, React, or DB imports. The API enforces them; the UI only
-reflects them.
-
-- Risk is always derived from likelihood × impact, never supplied by a client.
-- A case must be Triaged before it can close; High/Critical risk needs a review
-  note; a required investigation needs an outcome; a required corrective action
-  must itself be Closed.
-- A Closed case rejects every mutation.
-- Every successful mutation appends one audit entry with field-level old → new,
-  a server-set actor and timestamp. Rejected actions append nothing.
-
-A blocked close returns `CLOSURE_BLOCKED` with the **complete** blocker list in
-`extensions.blockers` — never a silent no-op:
-
-```json
-{
-  "message": "Case is not ready to be closed",
-  "code": "CLOSURE_BLOCKED",
-  "blockers": [
-    "Review note is required for High/Critical risk cases.",
-    "Investigation outcome is missing.",
-    "Corrective action is still open."
-  ]
-}
 ```

@@ -2,6 +2,7 @@
   "name": "compliance-triage-workbench",
   "private": true,
   "scripts": {
+    "setup": "./scripts/setup.sh",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
