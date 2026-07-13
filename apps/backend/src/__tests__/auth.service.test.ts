@@ -1,10 +1,10 @@
 import type { JwtPayload } from "@repo/shared";
 import jwt from "jsonwebtoken";
 import { beforeEach, describe, expect, it } from "vitest";
-import { env } from "../config/env.js";
-import { ConflictError, UnauthorizedError } from "../lib/errors.js";
-import { InMemoryUserRepository } from "../api/v1/repositories/in-memory-user.repository.js";
-import { AuthService } from "../api/v1/services/auth.service.js";
+import { env } from "../config/env";
+import { ConflictError, UnauthorizedError } from "../lib/errors";
+import { InMemoryUserRepository } from "../api/v1/repositories/in-memory-user.repository";
+import { AuthService } from "../api/v1/services/auth.service";
 
 let users: InMemoryUserRepository;
 let auth: AuthService;

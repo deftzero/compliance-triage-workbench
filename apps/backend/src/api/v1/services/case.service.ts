@@ -9,8 +9,8 @@ import {
   type TriageInput,
   type UpdateCaseInput,
 } from "@repo/shared";
-import { ForbiddenError, NotFoundError } from "../../../lib/errors.js";
-import type { AuditRepository, CaseRepository } from "../repositories/index.js";
+import { ForbiddenError, NotFoundError } from "../../../lib/errors";
+import type { AuditRepository, CaseRepository } from "../repositories/index";
 import {
   assertCanViewCase,
   closeCase,
@@ -18,7 +18,7 @@ import {
   triageCase,
   updateCase,
   type DomainResult,
-} from "./case-domain.js";
+} from "./case-domain";
 
 /** A case plus its server-computed readiness, which the client never derives itself. */
 export type CaseView = ComplianceCase & { closureStatus: ClosureStatus };

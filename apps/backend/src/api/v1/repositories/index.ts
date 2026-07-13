@@ -1,13 +1,13 @@
 import {
   InMemoryAuditRepository,
   InMemoryCaseRepository,
-} from "./in-memory-case.repository.js";
-import { InMemoryUserRepository } from "./in-memory-user.repository.js";
-import type { AuditRepository, CaseRepository } from "./case.repository.js";
-import type { UserRepository } from "./user.repository.js";
+} from "./in-memory-case.repository";
+import { InMemoryUserRepository } from "./in-memory-user.repository";
+import type { AuditRepository, CaseRepository } from "./case.repository";
+import type { UserRepository } from "./user.repository";
 
-export type { AuditRepository, CaseRepository } from "./case.repository.js";
-export type { UserRepository } from "./user.repository.js";
+export type { AuditRepository, CaseRepository } from "./case.repository";
+export type { UserRepository } from "./user.repository";
 
 export type Repositories = {
   users: UserRepository;

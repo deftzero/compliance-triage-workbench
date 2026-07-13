@@ -1,4 +1,4 @@
-import type { FieldChange } from "../types/case.js";
+import type { FieldChange } from "../types/case";
 
 function serialize(value: unknown): string | null {
   if (value === null || value === undefined) return null;

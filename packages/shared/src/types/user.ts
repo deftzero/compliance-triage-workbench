@@ -7,7 +7,7 @@ import type {
   publicUserSchema,
   roleSchema,
   userSchema,
-} from "../validators/user.js";
+} from "../validators/user";
 
 export type Role = z.infer<typeof roleSchema>;
 export type User = z.infer<typeof userSchema>;

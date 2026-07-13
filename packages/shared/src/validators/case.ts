@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORY_OPTIONS } from "../domain/constants.js";
+import { CATEGORY_OPTIONS } from "../domain/constants";
 
 export const riskLevelSchema = z.enum(["Low", "Medium", "High", "Critical"]);
 export const caseStatusSchema = z.enum(["Reported", "Triaged", "Closed"]);

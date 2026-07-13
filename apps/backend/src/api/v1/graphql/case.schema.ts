@@ -7,8 +7,8 @@ import {
   type ClosureStatus,
   type FieldChange,
 } from "@repo/shared";
-import { builder, requireActor, type GraphQLContext } from "./builder.js";
-import type { CaseView } from "../services/case.service.js";
+import { builder, requireActor, type GraphQLContext } from "./builder";
+import type { CaseView } from "../services/case.service";
 import {
   AuditActionEnum,
   CaseStatusEnum,
@@ -16,7 +16,7 @@ import {
   LikelihoodImpactEnum,
   RiskLevelEnum,
   TriageDecisionEnum,
-} from "./enums.js";
+} from "./enums";
 
 const ClosureStatusType = builder
   .objectRef<ClosureStatus>("ClosureStatus")

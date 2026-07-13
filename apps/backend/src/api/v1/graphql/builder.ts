@@ -1,8 +1,8 @@
 import SchemaBuilder from "@pothos/core";
 import type { Actor } from "@repo/shared";
-import { UnauthorizedError } from "../../../lib/errors.js";
-import type { AuthService } from "../services/auth.service.js";
-import type { CaseService } from "../services/case.service.js";
+import { UnauthorizedError } from "../../../lib/errors";
+import type { AuthService } from "../services/auth.service";
+import type { CaseService } from "../services/case.service";
 
 export type GraphQLContext = {
   /** Null for unauthenticated requests; resolvers opt in via `requireActor`. */

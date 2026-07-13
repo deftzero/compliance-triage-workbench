@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql";
 import { ZodError } from "zod";
-import { env } from "../../../config/env.js";
-import { ClosureBlockedError, HttpError } from "../../../lib/errors.js";
+import { env } from "../../../config/env";
+import { ClosureBlockedError, HttpError } from "../../../lib/errors";
 
 /**
  * Turns domain failures into GraphQL errors with a machine-readable `code`,

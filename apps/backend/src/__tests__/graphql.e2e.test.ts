@@ -15,7 +15,7 @@ import {
   errorOf,
   startTestServer,
   type TestServer,
-} from "./helpers/graphql-client.js";
+} from "./helpers/graphql-client";
 
 /**
  * The whole stack over HTTP: Express, Yoga's bearer-token context, the Pothos

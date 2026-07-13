@@ -1,4 +1,4 @@
-import type { LikelihoodImpact, RiskLevel } from "../types/case.js";
+import type { LikelihoodImpact, RiskLevel } from "../types/case";
 
 const WEIGHT: Record<LikelihoodImpact, number> = {
   Low: 1,

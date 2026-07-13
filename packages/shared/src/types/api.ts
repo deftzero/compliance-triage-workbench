@@ -3,8 +3,8 @@ import type {
   apiErrorSchema,
   apiIssueSchema,
   healthSchema,
-} from "../validators/api.js";
-import type { envSchema } from "../validators/env.js";
+} from "../validators/api";
+import type { envSchema } from "../validators/env";
 
 export type ApiIssue = z.infer<typeof apiIssueSchema>;
 export type ApiError = z.infer<typeof apiErrorSchema>;

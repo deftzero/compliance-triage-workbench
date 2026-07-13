@@ -7,7 +7,7 @@ import {
   roleSchema,
   triageDecisionSchema,
 } from "@repo/shared";
-import { builder } from "./builder.js";
+import { builder } from "./builder";
 
 // Enum members come straight off the Zod schemas, so the GraphQL schema can
 // never drift from the domain's idea of what the valid values are.

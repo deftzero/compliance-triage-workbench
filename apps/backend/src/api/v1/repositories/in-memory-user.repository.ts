@@ -1,5 +1,5 @@
 import type { User } from "@repo/shared";
-import type { UserRepository } from "./user.repository.js";
+import type { UserRepository } from "./user.repository";
 
 /** Default repository: lets the app boot and be exercised with zero infra. */
 export class InMemoryUserRepository implements UserRepository {

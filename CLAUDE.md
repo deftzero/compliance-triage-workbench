@@ -54,7 +54,7 @@ Yoga/Pothos), `packages/shared` (domain rules, Zod schemas, types).
 
 ```bash
 pnpm turbo run check-types lint test build   # must be green repo-wide
-./apps/backend/scripts/smoke.sh              # API lifecycle, needs dev server running
+pnpm test:e2e                                # Playwright; boots its own dev servers
 ```
 
 Commits: conventional style (`feat(scope): …`), imperative subject, body

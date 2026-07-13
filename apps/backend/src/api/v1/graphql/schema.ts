@@ -1,9 +1,9 @@
-import { builder } from "./builder.js";
+import { builder } from "./builder";
 
 // Imported for their side effects: each module registers its types and fields
 // on the shared builder before we call toSchema().
-import "./enums.js";
-import "./auth.schema.js";
-import "./case.schema.js";
+import "./enums";
+import "./auth.schema";
+import "./case.schema";
 
 export const schema = builder.toSchema();

@@ -3,7 +3,7 @@ import {
   matchesFilter,
   type AuditRepository,
   type CaseRepository,
-} from "./case.repository.js";
+} from "./case.repository";
 
 const newestFirst = (a: ComplianceCase, b: ComplianceCase) =>
   b.createdAt.localeCompare(a.createdAt);

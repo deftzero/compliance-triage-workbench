@@ -1,6 +1,6 @@
-import { createApp } from "./app.js";
-import { GRAPHQL_PATH } from "./api/v1/graphql/yoga.js";
-import { env } from "./config/env.js";
+import { createApp } from "./app";
+import { GRAPHQL_PATH } from "./api/v1/graphql/yoga";
+import { env } from "./config/env";
 
 const app = await createApp();
 

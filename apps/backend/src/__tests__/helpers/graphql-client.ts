@@ -1,8 +1,8 @@
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
-import { createApp } from "../../app.js";
-import { GRAPHQL_PATH } from "../../api/v1/graphql/yoga.js";
-import { SEED_PASSWORD } from "../../api/v1/services/seed.js";
+import { createApp } from "../../app";
+import { GRAPHQL_PATH } from "../../api/v1/graphql/yoga";
+import { SEED_PASSWORD } from "../../api/v1/services/seed";
 
 /** A GraphQL response as it arrives on the wire — errors included, not thrown. */
 export type GraphQLResponse<T = Record<string, unknown>> = {

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { ComplianceCase, LikelihoodImpact } from "../types/case.js";
-import { getClosureStatus } from "../domain/closure.js";
-import { CLOSURE_BLOCKERS } from "../domain/constants.js";
-import { diffFields } from "../domain/diff.js";
-import { calculateRiskLevel } from "../domain/risk.js";
+import type { ComplianceCase, LikelihoodImpact } from "../types/case";
+import { getClosureStatus } from "../domain/closure";
+import { CLOSURE_BLOCKERS } from "../domain/constants";
+import { diffFields } from "../domain/diff";
+import { calculateRiskLevel } from "../domain/risk";
 
 describe("calculateRiskLevel", () => {
   const cases: [LikelihoodImpact, LikelihoodImpact, string][] = [

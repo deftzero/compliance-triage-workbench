@@ -14,7 +14,7 @@ import type {
   triageDecisionSchema,
   triageInputSchema,
   updateCaseSchema,
-} from "../validators/case.js";
+} from "../validators/case";
 
 export type RiskLevel = z.infer<typeof riskLevelSchema>;
 export type CaseStatus = z.infer<typeof caseStatusSchema>;

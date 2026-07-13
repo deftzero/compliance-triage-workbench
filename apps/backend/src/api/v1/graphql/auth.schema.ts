@@ -4,8 +4,8 @@ import {
   type AuthResponse,
   type PublicUser,
 } from "@repo/shared";
-import { builder, requireActor, type GraphQLContext } from "./builder.js";
-import { RoleEnum } from "./enums.js";
+import { builder, requireActor, type GraphQLContext } from "./builder";
+import { RoleEnum } from "./enums";
 
 export const UserType = builder.objectRef<PublicUser>("User").implement({
   fields: (t) => ({

@@ -1,5 +1,5 @@
-import type { ClosureStatus, ComplianceCase } from "../types/case.js";
-import { CLOSURE_BLOCKERS } from "./constants.js";
+import type { ClosureStatus, ComplianceCase } from "../types/case";
+import { CLOSURE_BLOCKERS } from "./constants";
 
 /** The fields closure readiness actually depends on — lets callers pass a draft. */
 export type ClosureInput = Pick<

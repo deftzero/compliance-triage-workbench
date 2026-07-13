@@ -11,10 +11,10 @@ import type {
 import { jwtPayloadSchema } from "@repo/shared";
 import bcrypt from "bcryptjs";
 import jwt, { type SignOptions } from "jsonwebtoken";
-import { env } from "../../../config/env.js";
-import { ConflictError, UnauthorizedError } from "../../../lib/errors.js";
-import type { UserRepository } from "../repositories/index.js";
-import { toPublicUser } from "./user.service.js";
+import { env } from "../../../config/env";
+import { ConflictError, UnauthorizedError } from "../../../lib/errors";
+import type { UserRepository } from "../repositories/index";
+import { toPublicUser } from "./user.service";
 
 const SALT_ROUNDS = 10;
 

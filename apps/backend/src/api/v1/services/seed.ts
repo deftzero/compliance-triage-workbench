@@ -1,7 +1,7 @@
 import type { Actor } from "@repo/shared";
-import type { Repositories } from "../repositories/index.js";
-import type { AuthService } from "./auth.service.js";
-import { CaseService } from "./case.service.js";
+import type { Repositories } from "../repositories/index";
+import type { AuthService } from "./auth.service";
+import { CaseService } from "./case.service";
 
 export const SEED_PASSWORD = "password123";
 

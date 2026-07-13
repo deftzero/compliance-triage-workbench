@@ -1,7 +1,7 @@
 import type { ApiError } from "@repo/shared";
 import type { ErrorRequestHandler, RequestHandler } from "express";
-import { env } from "../config/env.js";
-import { HttpError } from "../lib/errors.js";
+import { env } from "../config/env";
+import { HttpError } from "../lib/errors";
 
 /**
  * These only cover the REST surface that survives (/health) and unknown paths.

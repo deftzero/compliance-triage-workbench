@@ -16,7 +16,7 @@ import { randomUUID } from "node:crypto";
 import {
   ClosureBlockedError,
   ForbiddenError,
-} from "../../../lib/errors.js";
+} from "../../../lib/errors";
 
 /**
  * The result of a domain operation: the new case state plus the audit entries

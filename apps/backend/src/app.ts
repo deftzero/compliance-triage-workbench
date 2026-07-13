@@ -1,7 +1,7 @@
 import type { Health } from "@repo/shared";
 import express, { type Express } from "express";
-import { GRAPHQL_PATH, createYogaServer } from "./api/v1/graphql/yoga.js";
-import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
+import { GRAPHQL_PATH, createYogaServer } from "./api/v1/graphql/yoga";
+import { errorHandler, notFoundHandler } from "./middleware/error-handler";
 
 export async function createApp(): Promise<Express> {
   const app = express();
